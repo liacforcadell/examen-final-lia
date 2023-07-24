@@ -1,0 +1,42 @@
+.image-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+}
+
+.toolbar {
+  height: 10vh;
+  border-radius: 0 0 25px 25px;
+  border: 0;
+}
+
+.toolbar-title {
+  white-space: break-spaces;
+  color: #FFFF;
+}
+
+ion-toolbar,ion-button {
+  --background: linear-gradient(to bottom right, rgba(174, 138, 223), rgba(90, 88, 191));
+  --background-focused: linear-gradient(to bottom right, rgba(174, 138, 223), rgba(90, 88, 191));
+  --background-activated: linear-gradient(to bottom right, rgba(174, 138, 223), rgba(90, 88, 191));
+  --background-hover: linear-gradient(to bottom right, rgba(195, 162, 241, 0.8), rgba(106, 104, 199, 0.8));
+}
+
+.card-footer {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.card {
+  padding: 1rem;
+}
+
+.small-title {
+  font-size: 1rem;
+  padding-bottom: 0;
+}
+.card-content {
+  font-size: 0.8rem;
+  line-height: 1;
+}
