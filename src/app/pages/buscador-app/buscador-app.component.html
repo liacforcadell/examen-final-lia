@@ -1,70 +1,42 @@
 <ion-header>
   <ion-toolbar class="toolbar">
-    <ion-title class="toolbar-title">{{'Clínica Veterinaria KUARAHY'}}</ion-title>
+    <ion-title class="toolbar-title">{{'Módulo de Pagos'}}</ion-title>
   </ion-toolbar>
 </ion-header>
 <ion-content class="ion-padding">
+  <div style="display: flex; align-items: center;">
+    <ion-searchbar [(ngModel)]="nroDocumento" search-icon="search" placeholder="Buscar" show-clear-button="focus" style="display: inline-block;"></ion-searchbar>
+    <ion-button (click)="buscar()" [disabled]="!nroDocumento" class="button-right" style="display: inline-block;">Buscar</ion-button>
+  </div>
 
   <ion-card class="card">
     <ion-card-header>
-      <ion-card-subtitle>Control de Vacunas</ion-card-subtitle>
+      <ion-card-subtitle>Datos del Asegurado</ion-card-subtitle>
     </ion-card-header>
 
     <ion-card-content>
       <ion-list>
         <ion-item>
-          <ion-select label="Cliente" placeholder="Seleccionar cliente"
-            (ionChange)="optionSelectedCliente($event, 'ClienteID', 1)" [(ngModel)]="selectedCliente">
-            <ion-select-option *ngFor="let cliente of listaClientes" [value]="cliente">{{ cliente.NombreApelllido
-              }}</ion-select-option>
-          </ion-select>
+          <ion-input label="Nombre:" value="{{asegurado.nombre || ''}}" [readonly]="true"></ion-input>
         </ion-item>
         <ion-item>
-          <ion-select label="Mascotas" placeholder="Seleccionar mascota" [(ngModel)]="selectedMascota" [disabled]="!selectedCliente">
-            <ion-select-option *ngFor="let mascota of listaMascotasCliente" [value]="mascota"
-              (ionChange)="optionSelectedCliente($event, 'MascotaID', 2)">{{ mascota.Nombre
-              }}</ion-select-option>
-          </ion-select>
+          <ion-input label="Plan:" value="{{asegurado.plan_asegurado  || ''}}" [readonly]="true"></ion-input>
         </ion-item>
+
       </ion-list>
     </ion-card-content>
-    <div class="card-footer">
-      <ion-button (click)="verHistorial()" [disabled]="!selectedMascota" class="button-right">Ver Historial</ion-button>
-    </div>
   </ion-card>
 
-  <ion-card *ngFor="let vacunas of listaVacunasMascota">
+  <ion-card *ngFor="let cuotas of listaCuotasPendientes">
     <ion-card-header>
       <!-- <ion-card-title>Card Title</ion-card-title> -->
-      <ion-card-subtitle>{{ vacunas.vacuna }}</ion-card-subtitle>
+      <ion-card-subtitle>{{ ' NRO CUOTA: '+ cuotas.nro_cuota }}</ion-card-subtitle>
     </ion-card-header>
 
     <ion-card-content>
-      <div>{{ 'Fecha Vacunación: ' + vacunas.FechaVacunacion }}</div>
-      <div>{{ 'Costo: ' + vacunas.costo + ' guaranies.' }}</div>
+      <div>{{ 'Fecha Vencimiento: ' + cuotas.fecha_vencimiento }}</div>
+      <div>{{ 'Monto: ' + cuotas.monto_cuota + ' guaranies.' }}</div>
     </ion-card-content>
-
-    <!-- <ion-button fill="clear">Action 1</ion-button>
-    <ion-button fill="clear">Action 2</ion-button> -->
   </ion-card>
-  <!-- <ion-card *ngFor="let prod of listaProductos" (click)="irPaginaProducto(prod)">
-    <ion-grid>
-      <ion-row>
-        <ion-col size="4">
-          <div class="image-container">
-            <img alt="{{ prod.Titulo }}" src="{{ URLImagen + prod?.img }}" />
-          </div>
-        </ion-col>
-        <ion-col size="8">
-          <ion-card-header>
-            <ion-card-title class="small-title">{{ prod.Titulo }}</ion-card-title>
-            <ion-card-subtitle>{{ prod.Precio + ' GS.' }}</ion-card-subtitle>
-          </ion-card-header>
-          <ion-card-content class="card-content">
-            {{ prod.Contenido }}
-          </ion-card-content>
-        </ion-col>
-      </ion-row>
-    </ion-grid>
-  </ion-card> -->
+  <ion-button *ngIf="listaCuotasPendientes.length > 0" (click)="confirmarPago()" [disabled]="!nroDocumento" class="button-left">Confirmar Pago</ion-button>
 </ion-content>

@@ -1,9 +1,8 @@
 import { Component } from '@angular/core';
-import { FormControl } from '@angular/forms';
-import { Router } from '@angular/router';
-import { Cliente } from 'src/app/models/cliente.model';
-import { Mascota } from 'src/app/models/mascota.model';
-import { Vacuna } from 'src/app/models/vacuna.model';
+import { ToastController } from '@ionic/angular';
+import { Asegurado } from 'src/app/models/asegurado.model';
+import { CuotasPendientes } from 'src/app/models/cuotas-pendientes.model';
+import { ResponseHTTP } from 'src/app/models/response.model';
 import { BuscadorAppService } from 'src/app/services/buscador-app.service';
 
 @Component({
@@ -12,75 +11,74 @@ import { BuscadorAppService } from 'src/app/services/buscador-app.service';
   styleUrls: ['./buscador-app.component.css'],
 })
 export class BuscadorAppComponent {
-  URLImagen: string = 'http://www.hostcatedral.com/api/publicacion/';
-
-  listaClientes: Cliente[] = [];
-  listaMascotasCliente: Mascota[] = [];
-  listaVacunasMascota: Vacuna[] = [];
-  selectedMascota!: Mascota;
-  selectedCliente!: Cliente;
+  // URLImagen: string = 'http://www.hostcatedral.com/api/publicacion/';
+  nroDocumento: string = '';
+  nombre: string = '';
+  planAsegurado: string = '';
+  listaCuotasPendientes: CuotasPendientes[] = [];
+  asegurado: Asegurado = new Asegurado();
 
   constructor(
     private buscadorService: BuscadorAppService,
-    private router: Router
+    private toastController: ToastController
   ) {}
 
   ngOnInit(): void {
-    this.cargarClientes();
   }
 
-  cargarClientes() {
-    this.buscadorService.getListaClientes().subscribe({
-      next: (response: Cliente[]) => {
-        this.listaClientes = response;
+  buscar() {
+    this.buscadorService.getAsegurado(this.nroDocumento).subscribe({
+      next: (response: ResponseHTTP<Asegurado>) => {
+        this.asegurado = response.data[0] || [];
+        this.cargarCuotasPendientes(this.asegurado);
       },
-      error: (error: any) => {
+      error: (error) => {
+        this.presentToast(error.error.message);
         console.error(error);
       },
     });
   }
 
-  cargarMascotas(idCliente: number) {
-    this.buscadorService.getMascotasPorCliente(idCliente).subscribe({
-      next: (response: Mascota[]) => {
-        this.listaMascotasCliente = response;
+  cargarCuotasPendientes({asegurado_id}: Asegurado) {
+    this.buscadorService.getCuotasPendientes(asegurado_id).subscribe({
+      next: (response: ResponseHTTP<CuotasPendientes>) => {
+        this.listaCuotasPendientes = response.data || [];
       },
       error: (error: any) => {
+        this.presentToast(error.error.message);
         console.error(error);
       },
     });
   }
 
-  verHistorial() {
-    const idMascostaSeleccionada = +this.selectedMascota.MascotaID;
-    this.buscadorService.getVacunasPorMascota(idMascostaSeleccionada).subscribe({
-      next: (response: Vacuna[]) => {
-        this.listaVacunasMascota = response;
+  confirmarPago() {
+    const [primeraCuota] = this.listaCuotasPendientes;
+
+    const pago = {
+      contrato_id: primeraCuota?.contrato_cuota_id,
+      nro_cuota: primeraCuota?.nro_cuota,
+      monto_cuota: primeraCuota?.monto_cuota,
+    };
+
+    this.buscadorService.pagarCuota(primeraCuota).subscribe({
+      next: (response: any) => {
+        this.presentToast(response.message, 'success');
       },
       error: (error: any) => {
+        this.presentToast(error.error.message);
         console.error(error);
       },
     });
   }
 
-  // Tipo: 1 - cliente o 2 - mascota
-  optionSelectedCliente(event: any, propiedadNombre: string, tipo: number) {
-    const id = event.detail.value[propiedadNombre];
-    this.listaVacunasMascota = [];
+  async presentToast(message: string = 'Ocurrió un error inesperado', type: string = 'danger') {
+    const toast = await this.toastController.create({
+      message: message.toUpperCase(),
+      duration: 3000,
+      color: type,
+      position: 'bottom',
+    });
 
-    +tipo === 1 ? this.searchMascotas(id) : this.searchVacunas(id);
-  }
-
-  searchMascotas(id: number) {
-    this.listaMascotasCliente = [];
-    this.cargarMascotas(id);
-  }
-
-  searchVacunas(id: number) {
-    this.cargarMascotas(id);
-  }
-
-  irPaginaProducto(producto: Mascota) {
-    // this.router.navigate(['producto', producto]);
+    await toast.present();
   }
 }
